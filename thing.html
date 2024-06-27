@@ -14,6 +14,9 @@
     max-width: 100%;
     margin: 20px auto;
   }
+  .error {
+    color: red;
+  }
 </style>
 </head>
 <body>
@@ -74,8 +77,20 @@
           }
           
           bbcode += "[/font_size][/center]";
-          document.getElementById('bbcode-output').value = bbcode;
-          document.getElementById('output-length').innerText = "Output Length: " + bbcode.length + " characters";
+          var bbcodeOutput = document.getElementById('bbcode-output');
+          bbcodeOutput.value = bbcode;
+          var outputLength = document.getElementById('output-length');
+          outputLength.innerText = "Output Length: " + bbcode.length + " characters";
+          
+          // Check if length exceeds limit and style accordingly
+          if (bbcode.length > 10000) {
+            bbcodeOutput.classList.add('error');
+            outputLength.classList.add('error');
+          } else {
+            bbcodeOutput.classList.remove('error');
+            outputLength.classList.remove('error');
+          }
+
           document.getElementById('image-preview').innerHTML = '<img src="' + canvas.toDataURL() + '" alt="Preview">';
         };
         img.src = e.target.result;
