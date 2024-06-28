@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>convert</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    padding: 20px;
+  }
+  #image-preview {
+    max-width: 100%;
+    margin: 20px auto;
+  }
+  .error {
+    color: red;
+  }
+</style>
+</head>
+<body>
+  <form id="upload-form" enctype="multipart/form-data">
+    <input type="file" id="image-input" accept="image/*" required>
+    <button type="submit">Convert Image</button>
+  </form>
+  <div id="image-preview"></div>
+  <textarea id="bbcode-output" cols="80" rows="20" readonly></textarea>
+  <div id="output-length"></div>
+
+  <script>
+    document.getElementById('upload-form').addEventListener('submit', function(event) {
+      event.preventDefault();
+      
+      var input = document.getElementById('image-input');
+      var file = input.files[0];
+      var reader = new FileReader();
+      
+      reader.onload = function(e) {
+        var img = new Image();
+        img.onload = function() {
+          var canvas = document.createElement('canvas');
+          var ctx = canvas.getContext('2d');
+          var maxSize = 16; // Maximum size in either width or height
+          
+          var width = img.width;
+          var height = img.height;
+          
+          // Maintain size if smaller than maxSize
+          if (width < maxSize && height < maxSize) {
+            maxSize = Math.max(width, height);
+          }
+          
+          // Cap maximum size to 10000 pixels
+          var maxPixels = 10000;
+          if (width * height > maxPixels) {
+            var scale = Math.sqrt(maxPixels / (width * height));
+            width *= scale;
+            height *= scale;
+          }
+          
+          canvas.width = width;
+          canvas.height = height;
+          ctx.drawImage(img, 0, 0, width, height);
+          
+          var imageData = ctx.getImageData(0, 0, width, height);
+          var pixels = imageData.data;
+          var bbcode = "[font_size=15]\n[/font_size]\n[center][hide_box][always_display]\n[font_size=17]";
+          
+          for (var i = 0; i < pixels.length; i += 4) {
+            var hex = rgbToHex(pixels[i], pixels[i+1], pixels[i+2]);
+            if ((i / 4) % width === 0 && i > 0) {
+              bbcode += "\n";
+            }
+            bbcode += "[bgcolor=" + hex + "]![/bgcolor]";
+          }
+          
+          bbcode += "[/font_size][/center]";
+          var bbcodeOutput = document.getElementById('bbcode-output');
+          bbcodeOutput.value = bbcode;
+          var outputLength = document.getElementById('output-length');
+          outputLength.innerText = "Output Length: " + bbcode.length + " characters";
+          
+          // Check if length exceeds limit and style accordingly
+          if (bbcode.length > 10000) {
+            bbcodeOutput.classList.add('error');
+            outputLength.classList.add('error');
+          } else {
+            bbcodeOutput.classList.remove('error');
+            outputLength.classList.remove('error');
+          }
+          
+          document.getElementById('image-preview').innerHTML = '<img src="' + canvas.toDataURL() + '" alt="Preview">';
+        };
+        img.src = e.target.result;
+      };
+      
+      reader.readAsDataURL(file);
+    });
+    
+    function rgbToHex(r, g, b) {
+      return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+    
+    function componentToHex(c) {
+      var hex = c.toString(16);
+      return hex.length == 1 ? "0" + hex : hex;
+    }
+  </script>
+</body>
+</html>
