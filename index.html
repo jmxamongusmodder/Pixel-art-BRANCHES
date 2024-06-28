@@ -66,21 +66,21 @@
           
           var imageData = ctx.getImageData(0, 0, width, height);
           var pixels = imageData.data;
-          var bbcode = "[font_size=15][/font_size]\n[center][hide_box][always_display][font_size=17]";
+          var bbcode = "[font_size=15][/font_size]\n[center][hide_box][always_display]\n[font_size=17]";
           
           for (var i = 0; i < pixels.length; i += 4) {
             var hex = rgbToHex(pixels[i], pixels[i+1], pixels[i+2]);
             if ((i / 4) % width === 0 && i > 0) {
               bbcode += "\n";
             }
-            bbcode += "[bgcolor=" + hex + "] [/bgcolor]"; // Making it blank should perhaps fix the o! issue
+            bbcode += "[bgcolor=" + hex + "]o![/bgcolor]\n"; // I had to bring the o! issue back. Why?!?!?!?
           }
           
           bbcode += "\n[/font_size][/center]";
           var bbcodeOutput = document.getElementById('bbcode-output');
           bbcodeOutput.value = bbcode;
           var outputLength = document.getElementById('output-length');
-          outputLength.innerText = "Output Length: " + bbcode.length + " characters";
+          outputLength.innerText = "Output Length: " + bbcode.length + " characters"; // This includes special character's like space.
           
           // Check if length exceeds limit and style accordingly
           if (bbcode.length > 10000) {
