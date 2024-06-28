@@ -28,6 +28,7 @@
   <div id="image-preview"></div>
   <textarea id="bbcode-output" cols="100" rows="50" readonly></textarea>
   <div id="output-length"></div>
+  <button id="download-txt-btn">Download as .txt</button>
 
   <script>
     document.getElementById('upload-form').addEventListener('submit', function(event) {
@@ -71,7 +72,7 @@
           for (var i = 0; i < pixels.length; i += 4) {
             var hex = rgbToHex(pixels[i], pixels[i+1], pixels[i+2]);
             if ((i / 4) % width === 0 && i > 0) {
-              bbcode += "\n";
+              bbcode += "\r\n";
             }
             bbcode += "[bgcolor=" + hex + "]![/bgcolor]";
           }
@@ -97,6 +98,20 @@
       };
       
       reader.readAsDataURL(file);
+    });
+
+    document.getElementById('download-txt-btn').addEventListener('click', function() {
+      var bbcode = document.getElementById('bbcode-output').value;
+      var blob = new Blob([bbcode.replace(/\n/g, '\r\n')], { type: 'text/plain' });
+      var url = URL.createObjectURL(blob);
+      
+      var a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = 'output.txt';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
     });
     
     function rgbToHex(r, g, b) {
